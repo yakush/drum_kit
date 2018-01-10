@@ -1,0 +1,36 @@
+#ifndef COM_H_
+#define COM_H_
+
+#define COM_MSG_NOTE_ON 1
+#define COM_MSG_NOTE_OFF 2
+
+typedef struct {
+  int msg;
+  int volume: 1;
+  int freq: 1;
+} comMessage;
+
+class Com
+{
+  public:
+
+    Com() {      
+    }
+    
+    void begin(void (*callback)(comMessage)) {
+      _midiInCallback = callback;
+    }
+    
+    void read() {
+    }
+
+    void write() {
+    }
+
+  private:
+    void (*_midiInCallback)(comMessage);
+    char[64] buffer;
+};
+
+
+#endif

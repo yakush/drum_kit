@@ -1,0 +1,114 @@
+import processing.serial.*;
+
+Serial port;
+
+boolean doSend = false;
+
+byte b[] = null;
+
+void setup() {
+
+  if (doSend) {
+    String portName = Serial.list()[0]; //change the 0 to a 1 or 2 etc. to match your port
+    port = new Serial(this, portName, 9600);
+  }
+  selectInput("Select a file", "fileSelected");
+  size(900, 600);
+  stroke(0);
+}
+
+int xx = 0;
+int yy = 0;
+int pos = 0;
+
+void draw() {
+
+  if (b!=null) {
+    int a = b[pos] & 0xff; 
+    int x = (int)(width * 1f*i/b.length);
+    int y = height/2+(int)(height/2 * 1f*(a-128)/255);
+    line(xx, yy, x, y);
+    pos++;
+    if (pos>=b.length) {
+      pos=0;
+      stroke(random(255));
+    }
+  }
+}
+
+void serialEvent (Serial thePort)
+{
+  if (doSend) {
+    String str = thePort.readStringUntil('\n');
+    if (str!=null && str.length()>0)
+      print(">> "+ str);
+  }
+}
+
+void fileSelected(File selection) {
+  if (selection == null) {
+    println("cancled");
+  } else {
+    println("selected: " + selection.getAbsolutePath());
+    sendFile(selection);
+  }
+}
+
+void sendFile(File file) {
+
+  int BUFFSIZE=32;
+
+  b = loadBytes(file.getAbsolutePath());
+  byte buff[] = new byte [BUFFSIZE];
+  int buffPos=0;
+
+
+  if (doSend) {  
+
+
+    //header
+    port.write("download\n");
+    port.write("name.raw\n");
+    port.write(""+b.length+"\n");
+
+    int lastProc=-1;
+    long sent =0;
+
+    for (int i = 0; i < b.length; i++) {
+
+      //dump buff
+      if (buffPos==BUFFSIZE) {
+        port.write(buff);    
+        sent+=BUFFSIZE;
+        buffPos=0;
+        delay(10);
+
+        int procc = (int)(100*sent/b.length);
+        if (procc!=lastProc) {
+          println(procc + "% " +sent + " / "+b.length);
+          lastProc=procc;
+        }
+      }
+
+      int a = b[i] & 0xff; // unsinged => singed
+      buff[buffPos]=(byte)a;
+      buffPos++;
+    } 
+
+    //dump buff
+    if (buffPos>0) {
+      byte [] rest = new byte[buffPos];
+      arrayCopy(buff, rest, buffPos);
+      port.write(rest);    
+      sent+=buffPos;
+
+      int procc = (int)(100*sent/b.length);
+      if (procc!=lastProc) {
+        println(procc + "% " +sent + " / "+b.length);
+        lastProc=procc;
+      }
+    }
+    println(100 + "% " +sent + " / "+b.length);
+    println("done");
+  }
+}

@@ -1,0 +1,27 @@
+#ifndef TONE_OUT_H_
+#define TONE_OUT_H_
+
+int toneOut_freq;
+int toneOut_x;
+hw_timer_t* toneOut_timer = NULL;
+
+void toneOut_init() {
+  //Use timer 1 (of 4)
+  // tick = (80MHZ/x)
+  // count to = 181 (~44000 hz)
+  toneOut_timer = timerBegin(0, 10, true);
+  timerAttachInterrupt(toneOut_timer, &toneOut_onTimer, true);
+  timerAlarmWrite(toneOut_timer, 181, true);
+  timerAlarmEnable(toneOut_timer);
+}
+
+void IRAM_ATTR toneOut_onTimer() {
+
+  if (!playing)
+    return;
+
+  toneOut_x++;
+  if (toneOut_x >= 44199) {
+    toneOut_x = 0;
+  }
+#endif

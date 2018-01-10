@@ -1,0 +1,31 @@
+/*
+   SD Card | ESP32
+      CS       SS
+      DI       MOSI
+      CLK      SCK
+      D0       MISO
+*/
+
+#include "FS.h"
+#include "SD.h"
+#include "SPI.h"
+#include "io_funcs.h"
+
+void setup() {
+
+  Serial.begin(115200);
+  delay(1000);
+  
+  Serial.println("loading SD card");
+  if(!SD.begin(SS, SPI, 20000000)){
+    Serial.println("SD Card Mount Failed");
+    return;
+  };
+  delay(1000);
+
+    
+}
+
+void loop() {
+  delay(10000);
+}
