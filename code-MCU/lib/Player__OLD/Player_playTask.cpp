@@ -15,7 +15,7 @@ void IRAM_ATTR _player_read_onPlayTimer();
 
 //-----------------------------------------------------------------
 
-void player_playTask_setPlayer(PlayerClass *player){
+void player_playTask_setPlayer(PlayerClass *player){  
   _player_play_player=player;
   _player_play_notifiedErr_noPlayer=false;
 }
