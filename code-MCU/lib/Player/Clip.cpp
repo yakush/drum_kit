@@ -1,13 +1,13 @@
-#include "Sample.h"
+#include "Clip.h"
 #include <Arduino.h>
 #include "SD.h"
 #include "FS.h"
-#include "SampleInfo.h"
+#include "ClipInfo.h"
 #include "Utils.h"
 
 using namespace NS_Player;
 
-Sample::Sample(uint in_bufferSize)
+Clip::Clip(uint in_bufferSize)
 {
     bufferSize = in_bufferSize;
     buffer[0] = new byte[bufferSize];
@@ -15,7 +15,7 @@ Sample::Sample(uint in_bufferSize)
     reset();
 }
 
-Sample::~Sample()
+Clip::~Clip()
 {
     delete[] buffer[0];
     delete[] buffer[1];
@@ -27,7 +27,7 @@ Sample::~Sample()
 }
 
 //-- methods:
-void Sample::prepare(SampleInfo_t in_info)
+void Clip::prepare(ClipInfo_t in_info)
 {
     reset();
 
@@ -40,7 +40,7 @@ void Sample::prepare(SampleInfo_t in_info)
     firstBufferReady = false;
 }
 
-void Sample::reset()
+void Clip::reset()
 {
     if (file)
     {
@@ -63,7 +63,7 @@ void Sample::reset()
     currentValue_R = 0;
 }
 
-void Sample::readAndInterpolate(long timeUS)
+void Clip::readAndInterpolate(long timeUS)
 {
     if (!isPlaying || !firstBufferReady)
     {
@@ -92,7 +92,7 @@ void Sample::readAndInterpolate(long timeUS)
     currentValue_R = sampleVal * volume * (0xFF - blendLR);
 }
 
-void Sample::updateState()
+void Clip::updateState()
 {
     // MUST BE LOCKED !
 
@@ -118,7 +118,7 @@ void Sample::updateState()
     }
 }
 
-int16_t Sample::consumeSingleSample()
+int16_t Clip::consumeSingleSample()
 {
     int numBytes;
     int16_t res;

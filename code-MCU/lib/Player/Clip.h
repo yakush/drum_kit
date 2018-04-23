@@ -1,30 +1,30 @@
-#ifndef Sample_H_
-#define Sample_H_
+#ifndef Clip_H_
+#define Clip_H_
 
-#include "SampleInfo.h"
+#include "ClipInfo.h"
 
 namespace NS_Player
 {
 
-class Sample
+class Clip
 {
 
 private:
   int16_t consumeSingleSample();
 
 public:
-  Sample(uint buffSize);
-  virtual ~Sample();
+  Clip(uint buffSize);
+  virtual ~Clip();
 
   //-- methods:
-  void prepare(SampleInfo_t info);
+  void prepare(ClipInfo_t info);
   void reset();
   void readAndInterpolate(long timeUS);
   void updateState();
 
   //-- fields:
 
-  SampleInfo_t info;
+  ClipInfo_t info;
 
   uint8_t volume = 0x10;
   uint8_t blendLR = 0x10;

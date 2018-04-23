@@ -1,6 +1,7 @@
 #include "Player.h"
 #include <Arduino.h>
-#include "SampleInfo.h"
+#include "ClipInfo.h"
+#include "Clip.h"
 #include "WavFile.h"
 #include "Utils.h"
 
@@ -28,12 +29,12 @@ void Player_CLASS::end()
 {
 }
 
-int Player_CLASS::LoadSample(String filepath, SampleInfo_t *sampleInfo)
+int Player_CLASS::LoadClip(String filepath, ClipInfo_t *clipInfo)
 {
-    int wavRes = getWaveProps(filepath, &sampleInfo->wavProps);
+    int wavRes = getWaveProps(filepath, &clipInfo->wavProps);
     if (wavRes == WAV_OK)
     {
-        sampleInfo->filepath = filepath;
+        clipInfo->filepath = filepath;
     }
     return wavRes;
 }
@@ -130,10 +131,10 @@ void IRAM_ATTR handlePlay_ISR()
 
     int32_t sumL_32;
     int32_t sumR_32;
-    for (int i = 0; i < PLAYER_MAX_PLAYING_SAMPLES; i++)
+    for (int i = 0; i < PLAYER_MAX_PLAYING_CLIPS; i++)
     {
-        SampleWrapper_t wrapper = player->samples[i];
-        Sample *s = wrapper.sample;
+        ClipWrapper_t wrapper = player->clips[i];
+        Clip *s = wrapper.clip;
         s->readAndInterpolate(now);
         sumL_32 += s->currentValue_L; //these are 24bit numbers, so no overflow can happen
         sumR_32 += s->currentValue_R; //these are 24bit numbers, so no overflow can happen
@@ -147,41 +148,41 @@ void IRAM_ATTR handlePlay_ISR()
 
     player->soundRenderer->play(sumL_32, sumR_32);
 
-    player->lockSamples_ISR();
-    for (int i = 0; i < PLAYER_MAX_PLAYING_SAMPLES; i++)
+    player->lockClips_ISR();
+    for (int i = 0; i < PLAYER_MAX_PLAYING_CLIPS; i++)
     {
-        SampleWrapper_t wrapper = player->samples[i];
-        Sample *s = wrapper.sample;
+        ClipWrapper_t wrapper = player->clips[i];
+        Clip *s = wrapper.clip;
         s->updateState();
     }
-    player->unlockSamples_ISR();
+    player->unlockClips_ISR();
 }
 
 void handleRead_TASK()
 {
-    static SampleWrapper_t readList[PLAYER_MAX_PLAYING_SAMPLES];
-    static int numSamplesToRead;
+    static ClipWrapper_t readList[PLAYER_MAX_PLAYING_CLIPS];
+    static int numClipsToRead;
 
-    player->lockSamples_TASK();
-    numSamplesToRead = 0;
-    for (int i = 0; i < PLAYER_MAX_PLAYING_SAMPLES; i++)
+    player->lockClips_TASK();
+    numClipsToRead = 0;
+    for (int i = 0; i < PLAYER_MAX_PLAYING_CLIPS; i++)
     {
-        SampleWrapper_t wrapper = player->samples[i];
-        Sample *s = wrapper.sample;
+        ClipWrapper_t wrapper = player->clips[i];
+        Clip *s = wrapper.clip;
         if (s->isPlaying && s->needFillBuffer)
         {
             s->isReadingFile = true;
-            readList[numSamplesToRead] = wrapper;
-            numSamplesToRead++;
+            readList[numClipsToRead] = wrapper;
+            numClipsToRead++;
         }
     }
-    player->unlockSamples_TASK();
+    player->unlockClips_TASK();
 
     //read samples
-    for (size_t i = 0; i < numSamplesToRead; i++)
+    for (size_t i = 0; i < numClipsToRead; i++)
     {
-        SampleWrapper_t wrapper = readList[i];
-        Sample *s = wrapper.sample;
+        ClipWrapper_t wrapper = readList[i];
+        Clip *s = wrapper.clip;
 
         size_t reads = s->file.read(s->buffer[!s->activeBuffer], s->bufferSize);
 
@@ -193,11 +194,11 @@ void handleRead_TASK()
     }
 
     //update state
-    player->lockSamples_TASK();
-    for (size_t i = 0; i < numSamplesToRead; i++)
+    player->lockClips_TASK();
+    for (size_t i = 0; i < numClipsToRead; i++)
     {
-        SampleWrapper_t wrapper = readList[i];
-        Sample *s = wrapper.sample;
+        ClipWrapper_t wrapper = readList[i];
+        Clip *s = wrapper.clip;
 
         s->isReadingFile = false;
 
@@ -209,5 +210,5 @@ void handleRead_TASK()
         }
     }
 
-    player->unlockSamples_TASK();
+    player->unlockClips_TASK();
 }

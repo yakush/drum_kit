@@ -1,53 +1,53 @@
 #ifndef Player_H_
 #define Player_H_
 
-#include "SampleInfo.h"
-#include "Sample.h"
+#include "ClipInfo.h"
+#include "Clip.h"
 #include "ISoundRenderer.h"
 
-#define PLAYER_MAX_PLAYING_SAMPLES 20
+#define PLAYER_MAX_PLAYING_CLIPS 20
 
 namespace NS_Player
 {
 
 typedef void (*PlayerCallback_play_ended_t)(uint32_t sampleHandle, uint8_t reason);
 
-typedef struct SampleWrapper_s
+typedef struct ClipWrapper_s
 {
   long handle;
-  Sample *sample;
+  Clip *clip;
   PlayerCallback_play_ended_t callback;
 
-} SampleWrapper_t;
+} ClipWrapper_t;
 
 class Player_CLASS
 {
 
 private:
-  portMUX_TYPE samplesMutex = portMUX_INITIALIZER_UNLOCKED;
+  portMUX_TYPE clipsMutex = portMUX_INITIALIZER_UNLOCKED;
 
 public:
   Player_CLASS();
   virtual ~Player_CLASS();
 
-  SampleWrapper_t *samples; //array
+  ClipWrapper_t *clips; //array
   ISoundRenderer *soundRenderer;
   uint16_t volume;
 
   bool begin(ISoundRenderer *soundRenderer);
   void end();
 
-  int LoadSample(String filepath, SampleInfo_t *sampleInfo);
+  int LoadClip(String filepath, ClipInfo_t *clipInfo);
 
-  long play(SampleInfo_t sampleInfo, uint8_t volume = 128, uint8_t blendLR = 128, PlayerCallback_play_ended_t = NULL);
-  void stop(long sampleHandle);
+  long play(ClipInfo_t clipInfo, uint8_t volume = 128, uint8_t blendLR = 128, PlayerCallback_play_ended_t = NULL);
+  void stop(long clipHandle);
   void stopAll();
 
   //helpers
-  void inline lockSamples_TASK() { portENTER_CRITICAL(&samplesMutex); };
-  void inline unlockSamples_TASK() { portEXIT_CRITICAL(&samplesMutex); };
-  void inline lockSamples_ISR() { portENTER_CRITICAL_ISR(&samplesMutex); };
-  void inline unlockSamples_ISR() { portEXIT_CRITICAL_ISR(&samplesMutex); };
+  void inline lockClips_TASK() { portENTER_CRITICAL(&clipsMutex); };
+  void inline unlockClips_TASK() { portEXIT_CRITICAL(&clipsMutex); };
+  void inline lockClips_ISR() { portENTER_CRITICAL_ISR(&clipsMutex); };
+  void inline unlockClips_ISR() { portEXIT_CRITICAL_ISR(&clipsMutex); };
 
 }; //Player_CLASS
 
