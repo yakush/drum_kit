@@ -379,8 +379,8 @@ void Player_CLASS::_handlePlay_ISR()
 {
     long now = micros();
 
-    int32_t sumL_32;
-    int32_t sumR_32;
+    int32_t sumL_32=0;
+    int32_t sumR_32=0;
     for (int i = 0; i < PLAYER_MAX_PLAYING_CLIPS; i++)
     {
         ClipWrapper_t wrapper = clips[i];

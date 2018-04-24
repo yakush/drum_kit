@@ -70,15 +70,17 @@ void setup()
   Serial.printf("dataStart : %u\n", clipInfo1.wavProps.dataStart);
   Serial.printf("dataLength : %u\n", clipInfo1.wavProps.dataLength);
 
-  //PLAY:
   long handle1 = Player.playClip(clipInfo1, 128, 128, callback_ended);
-  delay(5000);
-  long handle2 = Player.playClip(clipInfo1, 128, 128, callback_ended);
 
-  delay(10000);
-  Player.stopClip(handle1);
-  delay(10000);
-  Player.stopClip(handle2);
+  //PLAY:
+  // long handle1 = Player.playClip(clipInfo1, 128, 128, callback_ended);
+  // delay(5000);
+  // long handle2 = Player.playClip(clipInfo1, 128, 128, callback_ended);
+
+  // delay(10000);
+  // Player.stopClip(handle1);
+  // delay(10000);
+  // Player.stopClip(handle2);
 
 }
 
