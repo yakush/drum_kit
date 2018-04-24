@@ -2,6 +2,7 @@
 #define Clip_H_
 
 #include "ClipInfo.h"
+#include "ClipEndCallback.h"
 
 namespace NS_Player
 {
@@ -31,7 +32,6 @@ public:
 
   // FILE stuff
   File file;
-  size_t filePos;
 
   // buffers stuff
   byte *buffer[2]; //arr[][]
@@ -42,8 +42,10 @@ public:
   bool firstBufferReady = false;
 
   bool isPlaying = false;
-  bool isRequestStop = false;
   bool isReadingFile = false;
+  bool isRequestStop = false;
+  uint8_t requestStopReason = 0;
+  size_t playPosition;
 
   long lastSampledTime = 0;
   long startTime = 0;

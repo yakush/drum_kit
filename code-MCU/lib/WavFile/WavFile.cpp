@@ -28,7 +28,7 @@ typedef struct wavHeader_s
     uint32_t dataSize;
 } wavHeader_t;
 
-int getWaveProps(String path, wavProps_t *wavProps)
+wave_err_t getWaveProps(String path, wavProps_t *wavProps)
 {
     File file = SD.open(path, FILE_READ);
     if (!file)
@@ -70,7 +70,7 @@ int getWaveProps(String path, wavProps_t *wavProps)
     return WAV_OK;
 }
 
-String getWaveError(int errCode)
+String getWaveError(wave_err_t errCode)
 {
     switch (errCode)
     {

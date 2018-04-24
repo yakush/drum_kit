@@ -4,6 +4,7 @@
 #include "FS.h"
 #include "ClipInfo.h"
 #include "Utils.h"
+#include "ClipEndCallback.h"
 
 using namespace NS_Player;
 
@@ -42,12 +43,16 @@ void Clip::prepare(ClipInfo_t in_info)
 
 void Clip::reset()
 {
+    /* NOTE :   can't close file from ISR (?!)
+     *          raised "abort() was called at PC 0x4008131d on core 1"
+     *          and rebbots device..!
+     */
     if (file)
     {
         file.close();
     }
 
-    filePos = 0;
+    playPosition = 0;
     activeBuffer = 0;
     buffPos_play = 0;
     needFillBuffer = true;
@@ -55,6 +60,7 @@ void Clip::reset()
     isPlaying = false;
     isReadingFile = false;
     isRequestStop = false;
+    requestStopReason = 0;
     lastSampledTime = 0;
     startTime = 0;
     val_0 = 0;
@@ -98,9 +104,10 @@ void Clip::updateState()
 
     if (!isRequestStop && isPlaying && firstBufferReady)
     {
-        if (filePos >= info.wavProps.dataLength)
+        if (playPosition >= info.wavProps.dataLength)
         {
             isRequestStop = true;
+            requestStopReason = PLAYER_CLIP_ENDED_FINISHED;
         }
         else if (buffPos_play >= bufferSize)
         {
@@ -109,12 +116,6 @@ void Clip::updateState()
             buffPos_play = 0;
             needFillBuffer = true;
         }
-    }
-
-    // ok to dispose?
-    if (isRequestStop && !isReadingFile)
-    {
-        reset();
     }
 }
 
@@ -160,7 +161,7 @@ int16_t Clip::consumeSingleSample()
         // ...?!?!
     }
 
-    filePos += numBytes;
+    playPosition += numBytes;
     buffPos_play += numBytes;
     return res;
 }

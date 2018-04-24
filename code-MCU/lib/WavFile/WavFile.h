@@ -9,6 +9,8 @@
 #define WAV_ERR_HEADER 3
 #define WAV_ERR_SIZE_MISMATCH 4
 
+typedef int wave_err_t;
+
 typedef struct
 {
     uint32_t sampleRate;     // freq (Hz)
@@ -19,7 +21,7 @@ typedef struct
     uint32_t dataLength;
 } wavProps_t;
 
-int getWaveProps(String path, wavProps_t *wavProps);
+wave_err_t getWaveProps(String path, wavProps_t *wavProps);
 
-String getWaveError(int errCode);
+String getWaveError(wave_err_t errCode);
 #endif //WavFile_H_
